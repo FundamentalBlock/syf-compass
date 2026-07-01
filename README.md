@@ -1,1 +1,1 @@
-﻿# syf-compass
+# syf-compass
