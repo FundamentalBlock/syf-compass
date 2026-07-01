@@ -5,18 +5,25 @@ import MiniRisk from "../molecules/MiniRisk.jsx";
 import PaymentOption from "../molecules/PaymentOption.jsx";
 import CompassBottomSheet from "../organisms/CompassBottomSheet.jsx";
 import ShopShell from "../organisms/ShopShell.jsx";
-import { CARDS, PRODUCTS, USER } from "../data.js";
+import { CARDS, USER, getProductById } from "../data.js";
 import { calculateCompass } from "../utils/credit.js";
 import { money } from "../utils/money.js";
 
-export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
+export default function CheckoutPage({
+  cart,
+  applicantName = "",
+  accountBalance = 0,
+  approvedCard = { limit: 2500, apr: 0, aprText: "0% APR for 12 months" },
+  onBack,
+  onPlaceOrder,
+}) {
   const [selectedCardId, setSelectedCardId] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
 
   const items = cart.map((item) => ({
     ...item,
-    product: PRODUCTS.find((p) => p.id === item.productId),
+    product: getProductById(item.productId),
   }));
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.qty, 0);
@@ -24,10 +31,19 @@ export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
   const total = subtotal + tax;
 
   const selectedCard = CARDS.find((card) => card.id === selectedCardId);
+  const compassCard = selectedCard?.isSynchrony
+    ? {
+        ...selectedCard,
+        balance: accountBalance,
+        limit: approvedCard.limit,
+        apr: approvedCard.apr,
+        aprLabel: approvedCard.aprText,
+      }
+    : selectedCard;
 
   const compass = useMemo(
-    () => calculateCompass(selectedCard, total),
-    [selectedCard, total]
+    () => calculateCompass(compassCard, total),
+    [compassCard, total]
   );
 
   function handleSelect(card) {
@@ -57,7 +73,7 @@ export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
         <section className="panel-card">
           <h2>Delivery</h2>
           <p className="muted">
-            {USER.full} · {USER.city}, {USER.state} {USER.zip}
+            {(applicantName || USER.full).trim()} · {USER.city}, {USER.state} {USER.zip}
           </p>
         </section>
 
@@ -68,14 +84,26 @@ export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
             <span>Pay with an eligible Synchrony card through the app.</span>
           </div>
 
-          {CARDS.map((card) => (
-            <PaymentOption
-              key={card.id}
-              card={card}
-              selected={selectedCardId === card.id}
-              onSelect={() => handleSelect(card)}
-            />
-          ))}
+          {CARDS.map((card) => {
+            const displayCard = card.isSynchrony
+              ? {
+                  ...card,
+                  balance: accountBalance,
+                  limit: approvedCard.limit,
+                  apr: approvedCard.apr,
+                  aprLabel: approvedCard.aprText,
+                }
+              : card;
+
+            return (
+              <PaymentOption
+                key={card.id}
+                card={displayCard}
+                selected={selectedCardId === card.id}
+                onSelect={() => handleSelect(card)}
+              />
+            );
+          })}
 
           {selectedCard?.isSynchrony && compass && <MiniRisk compass={compass} />}
         </section>
@@ -84,7 +112,7 @@ export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
           <SummaryLine label="Items" value={money(subtotal)} />
           <SummaryLine label="Estimated tax" value={money(tax)} />
           <SummaryLine label="Order total" value={money(total)} total />
-          <Button disabled={!canPlaceOrder} onClick={onPlaceOrder}>
+          <Button disabled={!canPlaceOrder} onClick={() => onPlaceOrder(selectedCardId)}>
             Place order
           </Button>
           {selectedCardId && !acknowledged && (
@@ -93,9 +121,9 @@ export default function CheckoutPage({ cart, onBack, onPlaceOrder }) {
         </section>
       </div>
 
-      {sheetOpen && selectedCard && compass && (
+      {sheetOpen && compassCard && compass && (
         <CompassBottomSheet
-          card={selectedCard}
+          card={compassCard}
           total={total}
           compass={compass}
           onClose={() => setSheetOpen(false)}

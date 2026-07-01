@@ -1,3 +1,5 @@
+import { RETAILER_PRODUCTS } from "./data/retailers.js";
+
 export const PRODUCTS = [
   {
     id: 1,
@@ -69,42 +71,43 @@ export const PRODUCTS = [
 
 export const CARDS = [
   {
-    id: "syn-low",
+    id: "syn-new",
     brand: "Synchrony Store Card",
     last4: "7788",
     isSynchrony: true,
-    balance: 150,
-    limit: 1000,
-    apr: 29.99,
-    pointsMultiplier: 1,
-  },
-  {
-    id: "syn-mid",
-    brand: "Synchrony Store Card",
-    last4: "3311",
-    isSynchrony: true,
-    balance: 550,
-    limit: 1000,
-    apr: 29.99,
-    pointsMultiplier: 1,
-  },
-  {
-    id: "syn-high",
-    brand: "Synchrony Store Card",
-    last4: "9042",
-    isSynchrony: true,
-    balance: 850,
-    limit: 1000,
+    balance: 0,
+    limit: 1500,
     apr: 29.99,
     pointsMultiplier: 1,
   },
   {
     id: "visa",
-    brand: "Visa",
+    brand: "Visa Platinum",
     last4: "4242",
     isSynchrony: false,
   },
+  {
+    id: "amex",
+    brand: "Amex Gold",
+    last4: "9012",
+    isSynchrony: false,
+  },
+  {
+    id: "discover",
+    brand: "Discover It",
+    last4: "3141",
+    isSynchrony: false,
+  },
 ];
+
+export function getProductById(productId) {
+  const combinedProducts = [
+    ...PRODUCTS,
+    ...Object.values(RETAILER_PRODUCTS).flat(),
+  ];
+
+  return combinedProducts.find((product) => product.id === productId);
+}
 
 export const USER = {
   first: "Christopher",

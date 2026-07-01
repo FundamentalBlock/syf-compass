@@ -2,13 +2,13 @@ import Button from "../atoms/Button.jsx";
 import SummaryLine from "../atoms/SummaryLine.jsx";
 import CartRow from "../molecules/CartRow.jsx";
 import ShopShell from "../organisms/ShopShell.jsx";
-import { PRODUCTS } from "../data.js";
+import { getProductById } from "../data.js";
 import { money } from "../utils/money.js";
 
 export default function CartPage({ cart, onBack, onCheckout, onQty, onRemove }) {
   const items = cart.map((item) => ({
     ...item,
-    product: PRODUCTS.find((p) => p.id === item.productId),
+    product: getProductById(item.productId),
   }));
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.qty, 0);

@@ -1,6 +1,6 @@
 export default function CardIcon({ card }) {
   const label = card.isSynchrony
-    ? "SYNC"
+    ? "SYF"
     : card.brand.slice(0, 4).toUpperCase();
 
   return (

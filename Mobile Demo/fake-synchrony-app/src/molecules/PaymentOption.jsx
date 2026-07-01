@@ -9,7 +9,7 @@ export default function PaymentOption({ card, selected, onSelect }) {
         <strong>{card.brand} •••• {card.last4}</strong>
         {card.isSynchrony ? (
           <small>
-            Balance {money(card.balance)} / {money(card.limit)} · {card.apr}% APR
+            Balance {money(card.balance)} / {money(card.limit)} · {card.aprLabel || `${card.apr}% APR`}
           </small>
         ) : (
           <small>Linked external card · no Compass check</small>

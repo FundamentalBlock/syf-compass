@@ -13,6 +13,19 @@ export default function CompassBottomSheet({
 }) {
   const [checked, setChecked] = useState(false);
   const needsConfirm = compass.tier === "red";
+  const aprLabel = card?.aprLabel || `${card?.apr ?? 0}%`;
+  const sampleCarryAmount = 200;
+  const sampleCarryMonths = 2;
+  const monthlyRate = (card?.apr ?? 0) / 100 / 12;
+  const sampleInterest = sampleCarryAmount * monthlyRate * sampleCarryMonths;
+  const interestText = card?.apr
+    ? `If you carried $200 for 2 months at this rate, you’d pay about ${money(sampleInterest)} in interest.`
+    : "With a 0% intro APR, carrying a balance for a while would cost you $0 in interest during the intro period.";
+  const recommendation = compass.tier === "green"
+    ? "This is a healthy balance range, and paying it down before your statement closes can keep your credit profile strong."
+    : compass.tier === "yellow"
+      ? "This is still manageable, but paying a little extra now can prevent interest from stacking up."
+      : "This balance would be high for this card, so it may be smarter to use a lower-utilization option if you can.";
 
   return (
     <div className="sheet-backdrop">
@@ -56,7 +69,12 @@ export default function CompassBottomSheet({
           <Stat label="Purchase total" value={money(total)} />
           <Stat label="New balance" value={money(compass.projectedBalance)} />
           <Stat label="Credit limit" value={money(card.limit)} />
-          <Stat label="APR" value={`${card.apr}%`} />
+          <Stat label="APR" value={aprLabel} />
+        </div>
+
+        <div className="sheet-explain-card">
+          <p>{interestText}</p>
+          <strong>{recommendation}</strong>
         </div>
 
         {needsConfirm && (
